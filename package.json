@@ -1,0 +1,55 @@
+{
+  "name": "open-vitae",
+  "version": "0.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "body-parser": "^1.14.1",
+    "bunyan": "^1.5.1",
+    "clusterfork": "^0.2.2",
+    "command-line-args": "^1.0.0",
+    "compression": "^1.6.0",
+    "cors": "^2.7.1",
+    "elasticsearch": "^8.2.0",
+    "express": "4.13.3",
+    "express-jwks": "1.0.1",
+    "forever": "^0.15.1",
+    "globby": "^3.0.1",
+    "q": "^1.4.1",
+    "request": "^2.64.0",
+    "url-join": "0.0.1"
+  },
+  "devDependencies": {
+    "bunyan-prettystream": "hadfieldn/node-bunyan-prettystream",
+    "camel-case": "^1.2.2",
+    "chai": "^3.2.0",
+    "elasticsearch": "^8.2.0",
+    "glob": "^6.0.4",
+    "jscs": "^2.1.0",
+    "livereload": "^0.3.7",
+    "mkdirp": "^0.5.1",
+    "mocha": "^2.2.5",
+    "mssql": "^3.0.0",
+    "nock": "^2.10.0",
+    "nodemon": "^1.4.1",
+    "q": "^1.4.1",
+    "rimraf": "^2.4.2",
+    "sinon": "^1.15.4",
+    "supertest": "^1.0.1",
+    "timely": "^0.1.0"
+  },
+  "engine": {
+    "node": ">=4.0"
+  },
+  "scripts": {
+    "clean": "./node_modules/.bin/rimraf logs/*",
+    "lint": "./node_modules/.bin/jscs src",
+    "test": "IGNORE_AUTH=true ./node_modules/.bin/mocha -R spec --recursive src --timeout 10000",
+    "watch": "./node_modules/.bin/nodemon -x npm run dev",
+    "watch:debug": "./node_modules/.bin/nodemon --debug -q -w assets/ --ext '.' --exec 'npm run lint'",
+    "dev": "npm run clean && npm run lint --force && npm test && node .",
+    "production": "PRODUCTION=true ./node_modules/.bin/forever --append -o ./logs/forever.log -e ./logs/forever.log index.js",
+    "production:stop": "./node_modules/.bin/forever stop index.js",
+    "start": "npm run production",
+    "stop": "npm run production:stop"
+  }
+}
