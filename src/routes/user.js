@@ -1,3 +1,5 @@
+var logger = require('../logger.js');
+
 module.exports = function (server) {
 
 	server.get('/user/:email', function (req, res, next) {
@@ -6,11 +8,13 @@ module.exports = function (server) {
 	});
 
 	server.post('/user/:email', function (req, res, next) {
+		logger.info("user with email " + req.params.email + " with results: " + req.body);
 		var answers = JSON.parse(req.body).answers;
 		var answer;
 		var resume = { // based on jsonresume schema: http://jsonresume.org/schema/
 			"basics": {
-				"email": req.params.email
+				"email": req.params.email,
+				"location":{}
 			},
 			"work": [],
 			"education": [],
@@ -24,6 +28,9 @@ module.exports = function (server) {
 			switch (true) {
 				case contains(answer.tags, 'name'):
 					resume.name = answer.value;
+					break;
+				case contains(answer.tags, 'address') && contains(answer.tags, 'street'):
+					resume.location.address = answer.value;
 					break;
 			}
 		}
