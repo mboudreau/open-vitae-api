@@ -45,7 +45,7 @@ module.exports = function (server) {
 			resume.basics.location.region = value;
 		});
 		find(answers, ['address', 'postcode'], function (value) {
-			resume.basics.location.postalCode = value;
+			resume.basics.location.postalCode = value.amount;
 		});
 		find(answers, ['employer', 'emp_name'], function (value) {
 			employer = {};
@@ -67,7 +67,7 @@ module.exports = function (server) {
 			school.institution = value;
 		});
 		find(answers, ['education', 'grad_year'], function (value) {
-			school.endDate = value;
+			school.endDate = value.amount;
 		});
 		find(answers, ['education', 'award'], function (value) {
 			school.area = value;
