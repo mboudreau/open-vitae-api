@@ -17,6 +17,7 @@ module.exports = function (server) {
 		logger.info("user with email " + req.params.email + " with results: " + req.body);
 		var answers = JSON.parse(req.body).answers;
 		var answer;
+		var table = dynasty.table('open-vitae');
 		var resume = { // based on jsonresume schema: http://jsonresume.org/schema/
 			"basics": {
 				"email": req.params.email,
@@ -74,10 +75,19 @@ module.exports = function (server) {
 					break;
 				case contains(answer.tags, 'education') && contains(answer.tags, 'award'):
 					school.area = answer.value;
+					school.studyType = "Bachelor's Degree";
 					break;
 			}
 		}
-		next();
+
+		table
+    .insert(resume)
+    .then(function(resp) {
+        logger.info("Dynamo responded: " + resp);
+				res.status(201).send('User created.');
+				next();
+    });
+
 	});
 };
 
