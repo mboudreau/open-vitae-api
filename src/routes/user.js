@@ -42,6 +42,11 @@ module.exports = function (server) {
 		}
 		next();
 	});
+
+
+	server.post('/user/:email/allow/:company', function (req, res, next) {
+
+	});
 };
 
 
