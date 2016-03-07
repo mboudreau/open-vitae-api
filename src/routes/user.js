@@ -15,8 +15,7 @@ module.exports = function (server) {
 
 	server.post('/user/:email', function (req, res, next) {
 		logger.info("user with email " + req.params.email + " with results: " + req.body);
-		logger.debug(req.body);
-		var answers = JSON.parse(req.body).answers;
+		var answers = req.body.answers;
 		var answer;
 		var table = dynasty.table('open-vitae');
 		var resume = { // based on jsonresume schema: http://jsonresume.org/schema/
