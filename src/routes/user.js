@@ -5,11 +5,12 @@ module.exports = function (server) {
 
 	server.get('/user/:email', function (req, res, next) {
 		var table = dynasty.table('open-vitae');
-		table.find(req.params.email).then(function(user) {
+		table.find(req.params.email).then(function (user) {
 			res.send(user);
 			next();
-		}, function(error){
+		}, function (error) {
 			res.status(404).send('User not found');
+			next();
 		});
 	});
 
@@ -21,7 +22,7 @@ module.exports = function (server) {
 		var resume = { // based on jsonresume schema: http://jsonresume.org/schema/
 			"basics": {
 				"email": req.params.email,
-				"location":{}
+				"location": {}
 			},
 			"work": [],
 			"education": [],
@@ -79,14 +80,14 @@ module.exports = function (server) {
 					break;
 			}
 		}
-
-		table
-    .insert(resume)
-    .then(function(resp) {
-        logger.info("Dynamo responded: " + resp);
-				res.status(201).send('User created.');
-				next();
-    });
+		table.insert({email: req.params.email, resume: resume}).then(function (resp) {
+			logger.info("Dynamo responded: " + resp);
+			res.status(201).send('User created.');
+			next();
+		}, function (err) {
+			logger.error("DynamoDB error: " + err);
+			next(err);
+		});
 
 	});
 
