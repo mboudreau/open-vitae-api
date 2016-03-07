@@ -4,7 +4,7 @@ var config =
     name: 'open-vitae',
     streams: [
         {
-            level: 'info',
+            level: 'debug',
             stream: process.stdout
         }
     ]
