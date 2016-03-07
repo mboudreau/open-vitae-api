@@ -24,10 +24,7 @@ module.exports = function (server) {
 				"location": {}
 			},
 			"work": [],
-			"education": [],
-			"skills": [],
-			"languages": [],
-			"interests": []
+			"education": []
 		};
 
 		var employer, school;
