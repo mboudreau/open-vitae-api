@@ -1,10 +1,16 @@
 var logger = require('../logger.js');
+var dynasty = require('dynasty')({region: 'ap-northeast-1'});
 
 module.exports = function (server) {
 
 	server.get('/user/:email', function (req, res, next) {
-		res.send();
-		next();
+		var table = dynasty.table('open-vitae');
+		table.find(req.params.email).then(function(user) {
+			res.send(user);
+			next();
+		}, function(error){
+			res.status(404).send('User not found');
+		});
 	});
 
 	server.post('/user/:email', function (req, res, next) {
