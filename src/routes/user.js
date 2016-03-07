@@ -17,7 +17,6 @@ module.exports = function (server) {
 	server.post('/user/:email', function (req, res, next) {
 		logger.info("user with email " + req.params.email + " with results: " + JSON.stringify(req.body));
 		var answers = req.body.answers;
-		var answer;
 		var table = dynasty.table('open-vitae');
 		var resume = { // based on jsonresume schema: http://jsonresume.org/schema/
 			"basics": {
@@ -31,55 +30,52 @@ module.exports = function (server) {
 			"interests": []
 		};
 
-		var employer;
-		var school;
+		var employer, school;
 
-		for (var i = 0, len = answers.length; i < len; i++) {
-			answer = answers[i];
-			switch (true) {
-				case contains(answer.tags, 'name'):
-					resume.basics.name = answer.value;
-					break;
-				case contains(answer.tags, 'address') && contains(answer.tags, 'street'):
-					resume.basics.location.address = answer.value;
-					break;
-				case contains(answer.tags, 'address') && contains(answer.tags, 'suburb'):
-					resume.basics.location.city = answer.value;
-					break;
-				case contains(answer.tags, 'address') && contains(answer.tags, 'state'):
-					resume.basics.location.region = answer.value;
-					break;
-				case contains(answer.tags, 'address') && contains(answer.tags, 'postcode'):
-					resume.basics.location.postalCode = answer.value;
-					break;
-				case contains(answer.tags, 'employer') && contains(answer.tags, 'emp_name'):
-					employer = {};
-					resume.work.push(employer);
-					employer.company = answer.value;
-					break;
-				case contains(answer.tags, 'employer') && contains(answer.tags, 'startdate'):
-					employer.startDate = answer.value;
-					break;
-				case contains(answer.tags, 'employer') && contains(answer.tags, 'enddate'):
-					employer.endDate = answer.value;
-					break;
-				case contains(answer.tags, 'employer') && contains(answer.tags, 'description'):
-					employer.summary = answer.value;
-					break;
-				case contains(answer.tags, 'education') && contains(answer.tags, 'school_name'):
-					school = {};
-					resume.education.push(school);
-					school.institution = answer.value;
-					break;
-				case contains(answer.tags, 'education') && contains(answer.tags, 'grad_year'):
-					school.endDate = answer.value;
-					break;
-				case contains(answer.tags, 'education') && contains(answer.tags, 'award'):
-					school.area = answer.value;
-					school.studyType = "Bachelor's Degree";
-					break;
-			}
-		}
+		find(answers, ['name'], function (value) {
+			resume.basics.name = value;
+		});
+		find(answers, ['address', 'street'], function (value) {
+			resume.basics.location.address = value;
+		});
+		find(answers, ['address', 'suburb'], function (value) {
+			resume.basics.location.city = value;
+		});
+		find(answers, ['address', 'state'], function (value) {
+			resume.basics.location.region = value;
+		});
+		find(answers, ['address', 'postcode'], function (value) {
+			resume.basics.location.postalCode = value;
+		});
+		find(answers, ['employer', 'emp_name'], function (value) {
+			employer = {};
+			resume.work.push(employer);
+			employer.company = value;
+		});
+		find(answers, ['employer', 'startdate'], function (value) {
+			employer.startDate = value;
+		});
+		find(answers, ['employer', 'enddate'], function (value) {
+			employer.endDate = value;
+		});
+		find(answers, ['employer', 'description'], function (value) {
+			employer.summary = value;
+		});
+		find(answers, ['education', 'school_name'], function (value) {
+			school = {};
+			resume.education.push(school);
+			school.institution = value;
+		});
+		find(answers, ['education', 'grad_year'], function (value) {
+			school.endDate = value;
+		});
+		find(answers, ['education', 'award'], function (value) {
+			school.area = value;
+			school.studyType = "Bachelor's Degree";
+		});
+
+		logger.debug(resume);
+
 		table.insert({email: req.params.email, resume: resume}).then(function (resp) {
 			logger.info("Dynamo responded: " + resp);
 			res.status(201).send('User created.');
@@ -97,10 +93,24 @@ module.exports = function (server) {
 	});
 };
 
+function find(answers, tags, cb) {
+	for (var i = 0, len = answers.length; i < len; i++) {
+		var answer = answers[i];
+		if (contains(answer.tags, tags)) {
+			cb(answer.value);
+			return;
+		}
+	}
+}
 
-function contains(array, element) {
-	if(array) {
-		return array.indexOf(element) > -1;
+
+function contains(array, elements) {
+	if (array) {
+		var bool = true;
+		for (var i = 0, len = elements.length; i < len; i++) {
+			bool = bool && array.indexOf(elements[i]) != -1
+		}
+		return bool;
 	}
 	return false;
 }
